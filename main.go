@@ -1,4 +1,4 @@
-package acunetix_cli
+package main
 
 import (
 	"bufio"
