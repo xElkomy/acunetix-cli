@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/asaskevich/govalidator"
+	"github.com/xElkomy/acunetix-cli/utils"	// Updated import path
 )
 
 type ScanProfile struct {
@@ -43,7 +44,7 @@ var (
 )
 
 func main() {
-	loadConfig()
+	utils.loadConfig()
 
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: acunetix-cli [-h]")
@@ -89,22 +90,22 @@ func main() {
 				}
 			}
 			for _, url := range urls {
-				createScan(url, scanType)
+				utils.createScan(url, scanType)
 			}
 		} else if domain != "" {
 			if govalidator.IsURL(domain) {
-				createScan(domain, scanType)
+				utils.createScan(domain, scanType)
 			} else {
 				fmt.Println("[!] Invalid URL:", domain)
 			}
 		} else if filePath != "" {
-			targets, err := readTargetsFromFile(filePath)
+			targets, err := utils.readTargetsFromFile(filePath)
 			if err != nil {
 				fmt.Printf("[!] Error reading file: %v\n", err)
 				os.Exit(1)
 			}
 			for _, target := range targets {
-				createScan(target, scanType)
+				utils.createScan(target, scanType)
 			}
 		} else {
 			fmt.Println("[!] Must provide either domain or file containing list of targets\nFor Help: acunetix-cli scan -h")
@@ -130,9 +131,9 @@ func main() {
 		}
 
 		if domain != "" {
-			stopSpecificScan(domain)
+			utils.stopSpecificScan(domain)
 		} else if stopAll {
-			stopAllScans()
+			utils.stopAllScans()
 		} else {
 			fmt.Println("[!] Must provide either domain or stop all flag\nFor Help: acunetix-cli stop -h")
 		}
@@ -144,7 +145,7 @@ func main() {
 
 func stopScan(scanID string) error {
 	url := fmt.Sprintf("%s/api/v1/scans/%s/abort", tarURL, scanID)
-	_, err := makeRequest("POST", url, nil)
+	_, err := utils.makeRequest("POST", url, nil)
 	if err != nil {
 		return err
 	}
