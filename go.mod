@@ -1,4 +1,4 @@
-module github.com/xElkomy/acunetix-cli
+module acunetix_cli
 
 go 1.21.5
 
