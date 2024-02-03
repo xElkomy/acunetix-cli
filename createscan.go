@@ -2,11 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
-func createScan(targetURL string, scanType string) {
-	profileID = scanTypes[scanType]
+func createScan(targetURL string, scanType string) error {
+	profileID := scanTypes[scanType]
 	if profileID == "" {
 		profileID = scanTypes["full"]
 	}
@@ -17,22 +18,20 @@ func createScan(targetURL string, scanType string) {
 		"criticality": "10",
 	}
 
-	resp, err := makeRequest("POST", tarURL+"/api/v1/targets", data)
+	resp, err := makeRequest("POST", targetURL+"/api/v1/targets", data)
 	if err != nil {
-		fmt.Printf("Error creating target: %v\n", err)
-		return
+		fmt.Println(err)
+		return fmt.Errorf("error parsing target response: %v", err)
 	}
 
 	var result map[string]interface{}
 	if err := json.Unmarshal(resp, &result); err != nil {
-		fmt.Printf("Error parsing target response: %v\n", err)
-		return
+		return fmt.Errorf("error parsing target response: %v", err)
 	}
 
 	targetID, ok := result["target_id"].(string)
 	if !ok {
-		fmt.Println("Invalid target ID in response")
-		return
+		return errors.New("invalid target ID in response")
 	}
 
 	fmt.Printf("[*] Running scan on: %s\n", targetURL)
@@ -51,11 +50,11 @@ func createScan(targetURL string, scanType string) {
 		},
 	}
 
-	resp, err = makeRequest("POST", tarURL+"/api/v1/scans", scanData)
+	resp, err = makeRequest("POST", targetURL+"/api/v1/scans", scanData)
 	if err != nil {
-		fmt.Printf("Error creating scan: %v\n", err)
-		return
+		return fmt.Errorf("error creating scan: %v", err)
 	}
 
 	fmt.Printf("Scan response: %s\n", string(resp))
+	return nil
 }
